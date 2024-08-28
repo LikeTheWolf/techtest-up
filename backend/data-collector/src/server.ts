@@ -3,9 +3,11 @@ import express, { Request, Response } from 'express';
 import { connectToDatabase } from './database';
 import { DataFetch } from './dataFetch';
 
-const app = express();
+// Load environment variables from the correct file
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+dotenv.config({ path: envFile });
 
-dotenv.config({ path: '.env.production' });
+const app = express();
 
 const SERVER_PORT = process.env.PORT;
 
