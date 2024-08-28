@@ -1,0 +1,13 @@
+# Ignore TypeScript compiled JavaScript files
+*.js
+*.js.map
+
+# Ignore frontend build files
+frontend/dist/
+frontend/node_modules/
+
+# Ignore backend build files
+backend/data-collector/dist/
+backend/data-collector/node_modules/
+backend/api-service/dist/
+backend/api-service/node_modules/
