@@ -23,8 +23,10 @@ const options: mongoose.ConnectOptions = {
 
 export const connectToDatabase = async () => {
   try {
-    await mongoose.connect(connectionString, options);
     const logSafeUrl = `${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+    console.log(`Trying to connect to to MongoDB with Mongoose - ${logSafeUrl}`);
+
+    await mongoose.connect(connectionString, options);
     console.log(`Connected to MongoDB with Mongoose - ${logSafeUrl}`);
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
