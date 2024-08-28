@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-dotenv.config({ path: '.env.production' });
+// Load environment variables from the correct file
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+dotenv.config({ path: envFile });
 
 // Access environment variables
 const DB_HOST = process.env.DB_HOST;
