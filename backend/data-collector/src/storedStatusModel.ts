@@ -1,5 +1,15 @@
 import { Document, Schema, model } from 'mongoose';
 
+// Interface for each region's status
+interface IRegionStatus {
+  status: string;
+  region: string;
+  roles: string[];
+  results: IResults;
+  strict: boolean;
+  server_issue: any;
+}
+
 // Define the interface for the worker
 interface IWorker {
   wait_time: number;
@@ -40,15 +50,10 @@ interface IResults {
   stats: IStats;
 }
 
-// Define the interface for the status document
+// Define the top-level interface for the document
 export interface IStoredStatusModel extends Document {
-  status: string;
-  region: string;
-  roles: string[];
-  results: IResults;
-  strict: boolean;
-  server_issue: any;
   timestamp: Date; // field for TTL
+  regions: IRegionStatus[]; // array of region statuses
 }
 
 // Define the schemas based on the interfaces
@@ -62,7 +67,7 @@ const workerSchema = new Schema<IWorker>(
     recently_blocked_keys: [[Schema.Types.Mixed]],
     top_keys: [[Schema.Types.Mixed]],
   },
-  { _id: false } // Disable _id on everything but the top level document
+  { _id: false } // Disable _id on everything but the top-level document
 );
 
 const workerTupleSchema = new Schema({
@@ -78,7 +83,7 @@ const serverSchema = new Schema<IServer>(
     cpu_load: { type: Number, required: true },
     timers: { type: Number, required: true },
   },
-  { _id: false } // Disable _id on everything but the top level document
+  { _id: false } // Disable _id on everything but the top-level document
 );
 
 const statsSchema = new Schema<IStats>(
@@ -88,7 +93,7 @@ const statsSchema = new Schema<IStats>(
     session: { type: Number, required: true },
     server: { type: serverSchema, required: true },
   },
-  { _id: false } // Disable _id on everything but the top level document
+  { _id: false } // Disable _id on everything but the top-level document
 );
 
 const servicesSchema = new Schema<IServices>(
@@ -96,7 +101,7 @@ const servicesSchema = new Schema<IServices>(
     redis: { type: Boolean, required: true },
     database: { type: Boolean, required: true },
   },
-  { _id: false } // Disable _id on everything but the top level document
+  { _id: false } // Disable _id on everything but the top-level document
 );
 
 const resultsSchema = new Schema<IResults>(
@@ -104,17 +109,26 @@ const resultsSchema = new Schema<IResults>(
     services: { type: servicesSchema, required: true },
     stats: { type: statsSchema, required: true },
   },
-  { _id: false } // Disable _id on everything but the top level document
+  { _id: false } // Disable _id on everything but the top-level document
 );
 
+// Schema for each region's status
+const regionStatusSchema = new Schema<IRegionStatus>(
+  {
+    status: { type: String, required: true },
+    region: { type: String, required: true },
+    roles: [{ type: String, required: true }],
+    results: { type: resultsSchema, required: true },
+    strict: { type: Boolean, required: true },
+    server_issue: { type: Schema.Types.Mixed },
+  },
+  { _id: false } // Disable _id for the region subdocument
+);
+
+// Top-level schema for the document containing all regions
 const storedStatusSchema = new Schema<IStoredStatusModel>({
-  status: { type: String, required: true },
-  region: { type: String, required: true },
-  roles: [{ type: String, required: true }],
-  results: { type: resultsSchema, required: true },
-  strict: { type: Boolean, required: true },
-  server_issue: { type: Schema.Types.Mixed },
   timestamp: { type: Date, default: Date.now, expires: '7d' }, // TTL field
+  regions: { type: [regionStatusSchema], required: true }, // Array of regions
 });
 
 const StoredStatusModel = model<IStoredStatusModel>('StoredStatus', storedStatusSchema, 'status_history');

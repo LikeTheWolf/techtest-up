@@ -1,26 +1,38 @@
+import "@blueprintjs/core/lib/css/blueprint.css";
+import "@blueprintjs/icons/lib/css/blueprint-icons.css";
+
+import { Button, Navbar, NavbarDivider, NavbarGroup, NavbarHeading } from '@blueprintjs/core';
+import "@blueprintjs/core/lib/css/blueprint.css";
+import "@blueprintjs/icons/lib/css/blueprint-icons.css";
 import React from 'react';
-import logo from './logo.svg';
+import { Link, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
 
-function App() {
+import AboutPage from "./pages/About";
+import HomePage from "./pages/HomePage";
+
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        {/* Blueprint.js Navbar */}
+        <Navbar>
+          <NavbarGroup>
+            <NavbarHeading>My App</NavbarHeading>
+            <NavbarDivider />
+            <Link to="/"><Button className="bp3-minimal" icon="home" text="Home" /></Link>
+            <Link to="/about"><Button className="bp3-minimal" icon="info-sign" text="About" /></Link>
+          </NavbarGroup>
+        </Navbar>
+        
+        {/* React Router Routes */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+        </Routes>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
