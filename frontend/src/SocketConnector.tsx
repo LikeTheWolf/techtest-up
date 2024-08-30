@@ -9,7 +9,7 @@ export default class SocketConnector {
 
     console.log(`Setup up websocket on: ${HOST}:${PORT}`);
 
-    this.socket = io(`ws://${HOST}:${PORT}`, {
+    this.socket = io(`http://${HOST}:${PORT}`, {
       transports: ['websocket'],
     });
 
