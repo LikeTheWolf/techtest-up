@@ -28,10 +28,14 @@ server.listen(SERVER_PORT, async () => {
   const fetcher = new DataFetch(socketConnector, TICK_INTERVAL);
 
   socketConnector.on('connect', async ()=>{
-    //const initialData = await DataFetch.fetchAggregatedData();
-  
-    //socketConnector.emit('initialData', initialData);
-  })
+    const [initialDataHistoric, initialDataRecent] = await Promise.all([
+      DataFetch.fetchAggregatedDataHistoric(),
+      DataFetch.fetchAggregatedDataRecent()
+    ]);
+
+    socketConnector.emit('initialDataHistoric', initialDataHistoric);
+    socketConnector.emit('initialDataRecent', initialDataRecent);
+  });
 
   process.on("uncaughtException", (innerErr: Error) => {
     console.error(`UNCAUGHT EXCEPTION AT SYSTEM LEVEL: ${innerErr.message}`);

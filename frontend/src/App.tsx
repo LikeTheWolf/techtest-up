@@ -18,7 +18,7 @@ const App: React.FC = () => {
         {/* Blueprint.js Navbar */}
         <Navbar>
           <NavbarGroup>
-            <NavbarHeading>My App</NavbarHeading>
+            <NavbarHeading>Metrics</NavbarHeading>
             <NavbarDivider />
             <Link to="/"><Button className="bp3-minimal" icon="home" text="Home" /></Link>
             <Link to="/about"><Button className="bp3-minimal" icon="info-sign" text="About" /></Link>

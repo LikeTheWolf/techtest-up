@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { LOOKUP_ENDPOINTS } from './constants';
+import { aggregationPipeline } from './dataAggregations';
 import StoredStatusModel, { IStoredStatusModel } from './storedStatusModel';
 import { Timer } from './timer';
 
+const GRANULARITY = 20;
+const RECENT_NUM_RECORDS = 100;
 export class DataFetch {
   private timer: Timer;
   static socketInstance: any;
@@ -17,9 +20,16 @@ export class DataFetch {
   private static async fetchDataAndSave(): Promise<void> {    
     try {
       const data = await DataFetch.fetchData();
-      
-      await DataFetch.saveData(data);
-      //DataFetch.socketInstance.emit('data', data);
+      const saved = await DataFetch.saveData(data);
+      const pipeline = aggregationPipeline();
+
+      // Use the existing aggregation pipeline on the newly saved document
+      const [aggregatedResult] = await StoredStatusModel.aggregate([
+        { $match: { _id: saved._id } }, // Match the saved document by its ID
+        ...pipeline,
+      ]);
+
+      DataFetch.socketInstance.emit('data', aggregatedResult);
       
     } catch (error) {
       console.error('Error during data fetch or processing:', error);
@@ -47,31 +57,46 @@ export class DataFetch {
     }
   
     return {
-      timestamp: new Date(), // Current timestamp
+      timestamp: new Date(),
       regions: successfulResponseData, // Array of region status objects
     } as IStoredStatusModel;
   }
 
-  private static async saveData(data: IStoredStatusModel): Promise<void> {
+  private static async saveData(data: IStoredStatusModel): Promise<any> {
     try {
       const doc = new StoredStatusModel(data);
-      await doc.save();
+      const result = await doc.save();
+      return result;
     } catch (error) {
       console.error('Error saving data in MongoDB:', error);
     }
   }
 
-  public static async testFetchData(): Promise<any>{
-    await DataFetch.fetchDataAndSave();
+  public static async fetchAggregatedDataHistoric(): Promise<any> {
+    try {
+      const pipelineHistoric = aggregationPipeline(GRANULARITY);
+      
+      const resultHistoric = await StoredStatusModel.aggregate(pipelineHistoric);
+
+      // destructure first element to get clean result
+      const [formattedResult] = resultHistoric.length > 0 ? resultHistoric : [{}];
+
+      return formattedResult;          
+    } catch (error) {
+      console.error('Error fetching aggregated data from MongoDB:', error);
+    }
   }
 
-  public static async fetchAggregatedData(): Promise<any> {
+  public static async fetchAggregatedDataRecent(): Promise<any> {
     try {
-      
-    
-      return null;
-           
-      
+      const pipelineRecent = aggregationPipeline(undefined, RECENT_NUM_RECORDS);
+
+      const resultRecent = await StoredStatusModel.aggregate(pipelineRecent);
+
+      // destructure first element to get clean result
+      const [formattedResult] = resultRecent.length > 0 ? resultRecent : [{}];
+
+      return formattedResult;          
     } catch (error) {
       console.error('Error fetching aggregated data from MongoDB:', error);
     }

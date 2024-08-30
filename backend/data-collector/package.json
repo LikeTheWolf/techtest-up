@@ -8,7 +8,6 @@
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "start-dev": "cross-env NODE_ENV=development ts-node src/server.ts",
-    "migrate": "cross-env NODE_ENV=development ts-node src/migrationScript.ts",
     "start": "cross-env NODE_ENV=production node dist/server.js"
   },
   "devDependencies": {
