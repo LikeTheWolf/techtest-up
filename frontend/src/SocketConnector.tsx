@@ -9,8 +9,14 @@ export default class SocketConnector {
 
     console.log(`Setup up websocket on: ${HOST}:${PORT}`);
 
-    this.socket = io(`https://${HOST}:${PORT}`, {
-      transports: ['websocket'],
+    // this.socket = io(`https://${HOST}:${PORT}`, {
+    //   transports: ['websocket'],
+    // });
+
+    this.socket = io('wss://ws.likethewolf.org', {
+      path: '/socket.io',  // Ensure the path matches the backend configuration
+      transports: ['websocket'],  // Use WebSocket transport
+      secure: true,  // Ensure it's secure (wss)
     });
 
     this.socket.on('connect', () => {

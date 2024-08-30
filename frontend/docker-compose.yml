@@ -6,4 +6,3 @@ services:
     volumes:
       - /home/sav2748/ssl:/app/ssl:ro  # Mount SSL directory to the container folder
     command: ["npx", "http-server", "./build", "-p", "3000", "--ssl", "--cert", "/app/ssl/cloudflare-origin.pem", "--key", "/app/ssl/cloudflare-origin.key"]
-    
