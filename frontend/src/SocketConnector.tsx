@@ -4,20 +4,26 @@ export default class SocketConnector {
   private socket: Socket;
 
   constructor() {
+    const PROTOCOL = process.env.REACT_APP_SOCKET_PROTOCOL;
     const HOST = process.env.REACT_APP_SOCKET_HOST;
     const PORT = process.env.REACT_APP_SOCKET_PORT;
 
-    console.log(`Setup up websocket on: ${HOST}:${PORT}`);
+    //in dev this should be https://localhost:5000      PROTOCOL://HOST:PORT
+    //in prod this should be wss://ws.likethewolf.org    PROTOCOL://HOST
 
-    // this.socket = io(`https://${HOST}:${PORT}`, {
-    //   transports: ['websocket'],
-    // });
+    console.log(`Setup up websocket on: ${PROTOCOL}://${HOST}:${PORT}`);
 
-    this.socket = io('wss://ws.likethewolf.org', {
-      path: '/socket.io',  // Ensure the path matches the backend configuration
-      transports: ['websocket'],  // Use WebSocket transport
-      secure: true,  // Ensure it's secure (wss)
-    });
+    if(PROTOCOL === 'wss'){
+      this.socket = io(`${PROTOCOL}://${HOST}`, {
+        path: '/socket.io',  // Ensure the path matches the backend configuration
+        transports: ['websocket'],
+        secure: true,  // Ensure it's secure (wss)
+      });
+    } else {
+      this.socket = io(`${PROTOCOL}://${HOST}:${PORT}`, {
+        transports: ['websocket'],
+      });
+    }
 
     this.socket.on('connect', () => {
       console.log('Connected to socket:', this.socket.id);
