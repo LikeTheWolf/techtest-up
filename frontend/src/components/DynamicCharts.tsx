@@ -76,7 +76,7 @@ const DynamicCharts: React.FC<DynamicChartsProps> = ({ data }) => {
 const styles = {
   gridContainer: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',  // Changed to 3 charts per line
+    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',  // Responsive grid columns
     gap: '20px',
     padding: '20px',
   },
@@ -84,7 +84,7 @@ const styles = {
     border: '1px solid #ddd',
     borderRadius: '8px',
     padding: '20px',
-    backgroundColour: '#fff',
+    backgroundColor: '#fff',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
 };

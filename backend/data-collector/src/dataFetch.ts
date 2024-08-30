@@ -8,19 +8,19 @@ const GRANULARITY = 20;
 const RECENT_NUM_RECORDS = 100;
 export class DataFetch {
   private timer: Timer;
-  static socketInstance: any;
+  private socketInstance: any;
 
   constructor(socketInstance: any, interval: number) {
-    DataFetch.socketInstance = socketInstance;
+    this.socketInstance = socketInstance;
     this.timer = new Timer(interval);
     this.timer.start();
-    this.timer.on('tick', DataFetch.fetchDataAndSave.bind(this));
+    this.timer.on('tick', this.fetchDataAndSave.bind(this));
   }
 
-  private static async fetchDataAndSave(): Promise<void> {    
+  private async fetchDataAndSave(): Promise<void> {    
     try {
-      const data = await DataFetch.fetchData();
-      const saved = await DataFetch.saveData(data);
+      const data = await this.fetchData();
+      const saved = await this.saveData(data);
       const pipeline = aggregationPipeline();
 
       // Use the existing aggregation pipeline on the newly saved document
@@ -29,14 +29,14 @@ export class DataFetch {
         ...pipeline,
       ]);
 
-      DataFetch.socketInstance.emit('data', aggregatedResult);
+      this.socketInstance.emit('data', aggregatedResult);
       
     } catch (error) {
       console.error('Error during data fetch or processing:', error);
     }
   }
 
-  private static async fetchData(): Promise<IStoredStatusModel> {
+  private async fetchData(): Promise<IStoredStatusModel> {
     const promises: Promise<any>[] = [];
   
     // Fetch data from all endpoints
@@ -62,7 +62,7 @@ export class DataFetch {
     } as IStoredStatusModel;
   }
 
-  private static async saveData(data: IStoredStatusModel): Promise<any> {
+  private async saveData(data: IStoredStatusModel): Promise<any> {
     try {
       const doc = new StoredStatusModel(data);
       const result = await doc.save();
