@@ -6,6 +6,8 @@ services:
 
     ports:
     - "${PORT}:${PORT}"
+    volumes:
+      - /home/sav2748/ssl:/etc/ssl/private:ro  # Mount SSL directory from host to container with read-only access
     env_file:
       - .env.production
     environment:

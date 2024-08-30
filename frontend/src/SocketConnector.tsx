@@ -6,10 +6,14 @@ export default class SocketConnector {
   constructor() {
     const HOST = process.env.REACT_APP_SOCKET_HOST;
     const PORT = process.env.REACT_APP_SOCKET_PORT;
+    const SECURE_SOCKETS = process.env.REACT_APP_SECURE_SOCKETS === 'true';
 
+    let sockStr = SECURE_SOCKETS ? 'wss' : 'ws';
+
+    console.log(`using sockets with: ${sockStr}`);
     console.log(`Setup up websocket on: ${HOST}:${PORT}`);
 
-    this.socket = io(`ws://${HOST}:${PORT}`, {
+    this.socket = io(`${sockStr}://${HOST}:${PORT}`, {
       transports: ['websocket'],
     });
 
