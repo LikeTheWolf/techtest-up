@@ -20,4 +20,5 @@ RUN yarn build
 EXPOSE 3000
 
 # Serve the app, use npx to make sure http-server is available from node_modules
-CMD ["npx", "http-server", "./build", "-p", "3000"]
+CMD ["npx", "http-server", "./build", "-p", "3000", "--ssl", "--cert", "/app/ssl/cloudflare-origin.pem", "--key", "/app/ssl/cloudflare-origin.key"]
+
