@@ -19,6 +19,9 @@ ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
 
+# Create directory for SSL certificates
+RUN mkdir -p /usr/src/app/ssl
+
 COPY package.json yarn.lock ./
 
 # dont include dev dependancies

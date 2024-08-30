@@ -17,8 +17,8 @@ let server = null;
 if(process.env.NODE_ENV === 'production'){
   // Load SSL certificates from the mounted directory in the container
   const options = {
-    key: fs.readFileSync('/etc/ssl/private/cloudflare-origin.key'),  // Use the mounted path
-    cert: fs.readFileSync('/etc/ssl/private/cloudflare-origin.pem'), // Use the mounted path
+    key: fs.readFileSync('./ssl/cloudflare-origin.key'),  // Use the mounted path
+    cert: fs.readFileSync('./ssl/cloudflare-origin.pem'), // Use the mounted path
   };
   // Create an HTTPS server
   server = https.createServer(options, app);
