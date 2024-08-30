@@ -1,8 +1,6 @@
 import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
-import fs from 'fs';
 import http from 'http';
-import https from 'https';
 import { connectToDatabase } from './database';
 import { DataFetch } from './dataFetch';
 import SocketConnector from './socketConnector';
@@ -12,20 +10,21 @@ const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.en
 dotenv.config({ path: envFile });
 
 const app = express();
-let server = null;
+// let server = null;
 
-if(process.env.NODE_ENV === 'production'){
-  // Load SSL certificates from the mounted directory in the container
-  const options = {
-    key: fs.readFileSync('./ssl/cloudflare-origin.key'),  // Use the mounted path
-    cert: fs.readFileSync('./ssl/cloudflare-origin.pem'), // Use the mounted path
-  };
-  // Create an HTTPS server
-  server = https.createServer(options, app);
-} else {
-  server = http.createServer(app);
-}
+// if(process.env.NODE_ENV === 'production'){
+//   // Load SSL certificates from the mounted directory in the container
+//   const options = {
+//     key: fs.readFileSync('./ssl/cloudflare-origin.key'),  // Use the mounted path
+//     cert: fs.readFileSync('./ssl/cloudflare-origin.pem'), // Use the mounted path
+//   };
+//   // Create an HTTPS server
+//   server = https.createServer(options, app);
+// } else {
+//   server = http.createServer(app);
+// }
 
+const server = http.createServer(app);
 const SERVER_PORT = process.env.PORT;
 
 app.get('/heartbeat', (req: Request, res: Response) => {
