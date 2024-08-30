@@ -34,7 +34,7 @@ app.get('/heartbeat', (req: Request, res: Response) => {
 
 const socketConnector = new SocketConnector(server);
 
-server.listen(SERVER_PORT, async () => {
+server.listen(Number(SERVER_PORT), '0.0.0.0', async () => {  // Listen on all network interfaces
   console.log(`Server is running on port:${SERVER_PORT}`);
 
   await connectToDatabase();
