@@ -27,14 +27,32 @@ server.listen(SERVER_PORT, async () => {
   const TICK_INTERVAL = 60000;
   const fetcher = new DataFetch(socketConnector, TICK_INTERVAL);
 
-  socketConnector.on('connect', async ()=>{
-    const [initialDataHistoric, initialDataRecent] = await Promise.all([
-      DataFetch.fetchAggregatedDataHistoric(),
-      DataFetch.fetchAggregatedDataRecent()
-    ]);
-
-    socketConnector.emit('initialDataHistoric', initialDataHistoric);
-    socketConnector.emit('initialDataRecent', initialDataRecent);
+  socketConnector.on('connect', async () => {
+    // Start fetching both recent and historic data concurrently
+    const recentDataPromise = DataFetch.fetchAggregatedDataRecent();
+    const historicDataPromise = DataFetch.fetchAggregatedDataHistoric();
+  
+    // Handle recent data first when it's ready
+    recentDataPromise
+      .then(initialDataRecent => {
+        socketConnector.emit('initialDataRecent', initialDataRecent);
+      })
+      .catch(error => {
+        console.error('Error fetching recent data:', error);
+        // Optionally emit an error or handle it in some way
+        socketConnector.emit('error', 'Failed to fetch recent data');
+      });
+  
+    // Handle historic data when it's ready
+    historicDataPromise
+      .then(initialDataHistoric => {
+        socketConnector.emit('initialDataHistoric', initialDataHistoric);
+      })
+      .catch(error => {
+        console.error('Error fetching historic data:', error);
+        // Optionally emit an error or handle it in some way
+        socketConnector.emit('error', 'Failed to fetch historic data');
+      });
   });
 
   process.on("uncaughtException", (innerErr: Error) => {

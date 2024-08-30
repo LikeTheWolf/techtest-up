@@ -20,10 +20,9 @@ const HomePage: React.FC = () => {
       if(lastUpdated){
         setLastUpdated(lastUpdated);
       }
-      console.log("got new data: " + JSON.stringify(dataUpdate));
 
-       // Debugging check: Ensure dataUpdate is not null or undefined
-       if (!dataUpdate) {
+      // Debugging check: Ensure dataUpdate is not null or undefined
+      if (!dataUpdate) {
         console.warn("Received null or undefined dataUpdate, ignoring update.");
         return;
       }
