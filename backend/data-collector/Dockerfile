@@ -32,4 +32,6 @@ RUN yarn install --frozen-lockfile --production
 # copy the built files from dev stage to prod stage
 COPY --from=development /usr/src/app/dist ./dist
 
+EXPOSE 5000
+
 CMD ["node", "dist/server.js"]
