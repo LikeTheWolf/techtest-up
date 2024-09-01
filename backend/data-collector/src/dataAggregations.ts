@@ -1,10 +1,28 @@
 //every nth document granularity for faster loading
-export const aggregationPipeline = (everyNth?: number, lastNRecords?: number): any[] => {
-  const pipeline: any[] = [
-    // Step 1: Unwind the 'regions' array
-    { $unwind: "$regions" },
+export const aggregationPipelineImproved = (everyNth?: number, lastNRecords?: number): any[] => {
+  const pipeline = [];
 
-    // Step 2: Group data by timestamp and prepare objects for each key
+  pipeline.push(
+    { $sort: { timestamp: 1 } },
+  );
+
+  //Filter documents where the timestamp is every nth minute, if `everyNth` is provided
+  if (everyNth !== null && everyNth !== undefined) {
+    pipeline.push({
+      $match: {
+        $expr: {
+          // Extract the minute from the timestamp and check if it's divisible by `everyNth`
+          $eq: [{ $mod: [{ $minute: "$timestamp" }, everyNth] }, 0],
+        },
+      },
+    });
+  }
+
+  pipeline.push(
+    { $unwind: "$regions" },
+  );
+
+  pipeline.push(
     {
       $group: {
         _id: "$timestamp",
@@ -46,8 +64,10 @@ export const aggregationPipeline = (everyNth?: number, lastNRecords?: number): a
         },
       },
     },
+  );
 
-    // Step 3: Convert arrays of key-value pairs into objects for each metric
+
+  pipeline.push(
     {
       $project: {
         _id: 0,
@@ -60,11 +80,13 @@ export const aggregationPipeline = (everyNth?: number, lastNRecords?: number): a
         cpu_load: { $arrayToObject: "$cpu_load" },
       },
     },
+  );
 
-    // Step 4: Sort by timestamp in ascending order
+  pipeline.push(
     { $sort: { timestamp: 1 } },
+  );
 
-    // Step 5: Group by keys to separate them into individual documents
+  pipeline.push(
     {
       $group: {
         _id: null,
@@ -100,9 +122,9 @@ export const aggregationPipeline = (everyNth?: number, lastNRecords?: number): a
         },
       },
     },
-  ];
+  );
 
-  // Step 6: Slice the arrays to keep only the last 100 elements
+  // Slice the arrays to keep only the last 100 elements
   if (lastNRecords !== null && lastNRecords !== undefined) {
     const sliceNum = lastNRecords * -1;
     pipeline.push({
@@ -117,72 +139,10 @@ export const aggregationPipeline = (everyNth?: number, lastNRecords?: number): a
     });
   }
 
-  // Conditionally add the filtering stage based on the everyNth parameter
-  if (everyNth !== null && everyNth !== undefined) {
-    pipeline.push({
-      $project: {
-        servers_count: {
-          $filter: {
-            input: "$servers_count",
-            as: "item",
-            cond: {
-              $eq: [{ $mod: [{ $indexOfArray: ["$servers_count", "$$item"] }, everyNth] }, 0],
-            },
-          },
-        },
-        online: {
-          $filter: {
-            input: "$online",
-            as: "item",
-            cond: {
-              $eq: [{ $mod: [{ $indexOfArray: ["$online", "$$item"] }, everyNth] }, 0],
-            },
-          },
-        },
-        session: {
-          $filter: {
-            input: "$session",
-            as: "item",
-            cond: {
-              $eq: [{ $mod: [{ $indexOfArray: ["$session", "$$item"] }, everyNth] }, 0],
-            },
-          },
-        },
-        active_connections: {
-          $filter: {
-            input: "$active_connections",
-            as: "item",
-            cond: {
-              $eq: [{ $mod: [{ $indexOfArray: ["$active_connections", "$$item"] }, everyNth] }, 0],
-            },
-          },
-        },
-        wait_time: {
-          $filter: {
-            input: "$wait_time",
-            as: "item",
-            cond: {
-              $eq: [{ $mod: [{ $indexOfArray: ["$wait_time", "$$item"] }, everyNth] }, 0],
-            },
-          },
-        },
-        cpu_load: {
-          $filter: {
-            input: "$cpu_load",
-            as: "item",
-            cond: {
-              $eq: [{ $mod: [{ $indexOfArray: ["$cpu_load", "$$item"] }, everyNth] }, 0],
-            },
-          },
-        },
-      },
-    });
-  }
-
   // Remove _id at the final stage to avoid redundancy
   pipeline.push({
     $project: { _id: 0 },
   }); 
 
   return pipeline;   
-};   
+}; 

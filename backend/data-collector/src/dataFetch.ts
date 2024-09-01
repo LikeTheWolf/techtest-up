@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { LOOKUP_ENDPOINTS } from './constants';
-import { aggregationPipeline } from './dataAggregations';
+import { aggregationPipelineImproved } from './dataAggregations';
 import StoredStatusModel, { IStoredStatusModel } from './storedStatusModel';
 import { Timer } from './timer';
 
-const GRANULARITY = 20;
-const RECENT_NUM_RECORDS = 100;
+const GRANULARITY = 10;
+const RECENT_NUM_RECORDS = 200;
 export class DataFetch {
   private timer: Timer;
   private socketInstance: any;
@@ -21,7 +21,7 @@ export class DataFetch {
     try {
       const data = await this.fetchData();
       const saved = await this.saveData(data);
-      const pipeline = aggregationPipeline();
+      const pipeline = aggregationPipelineImproved();
 
       // Use the existing aggregation pipeline on the newly saved document
       const [aggregatedResult] = await StoredStatusModel.aggregate([
@@ -74,7 +74,7 @@ export class DataFetch {
 
   public static async fetchAggregatedDataHistoric(): Promise<any> {
     try {
-      const pipelineHistoric = aggregationPipeline(GRANULARITY);
+      const pipelineHistoric = aggregationPipelineImproved(GRANULARITY);
       
       const resultHistoric = await StoredStatusModel.aggregate(pipelineHistoric);
 
@@ -89,7 +89,7 @@ export class DataFetch {
 
   public static async fetchAggregatedDataRecent(): Promise<any> {
     try {
-      const pipelineRecent = aggregationPipeline(undefined, RECENT_NUM_RECORDS);
+      const pipelineRecent = aggregationPipelineImproved(undefined, RECENT_NUM_RECORDS);
 
       const resultRecent = await StoredStatusModel.aggregate(pipelineRecent);
 
