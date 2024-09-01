@@ -124,7 +124,7 @@ export const aggregationPipelineImproved = (everyNth?: number, lastNRecords?: nu
     },
   );
 
-  // Slice the arrays to keep only the last 100 elements
+  // Slice the arrays to keep only the last N elements
   if (lastNRecords !== null && lastNRecords !== undefined) {
     const sliceNum = lastNRecords * -1;
     pipeline.push({
