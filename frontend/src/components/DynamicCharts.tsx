@@ -1,5 +1,6 @@
 import React from 'react';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { CategoricalChartState } from 'recharts/types/chart/types';
 
 // dataset has the structure: { servers_count: [{ timestamp: string, region1: number, region2: number, ... }], ... }
 interface DynamicChartsProps {
@@ -11,6 +12,10 @@ const regionColours = ['#E2C8E4', '#28E6CF', '#BFD88C', '#77B1A9', '#F3C981', '#
 
 const DynamicCharts: React.FC<DynamicChartsProps> = ({ data }) => {
   // Render charts for each metric
+  const handleClick = (nextState: CategoricalChartState, event: any) => {
+    console.log(event);
+  };
+  
   const renderChart = (metricData: any, title: string) => (
     <div style={styles.chartItem}>
       <h3>{title}</h3>
@@ -23,9 +28,10 @@ const DynamicCharts: React.FC<DynamicChartsProps> = ({ data }) => {
             left: 20,
             bottom: 5,
           }}
+          onClick={handleClick}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="timestamp" tick={false} />
+          <XAxis dataKey="timestamp" tick={false}/>
           <YAxis />
           <Tooltip
             formatter={(value: any, name: string, props: any) => [
