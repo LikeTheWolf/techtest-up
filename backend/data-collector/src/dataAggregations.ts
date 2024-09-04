@@ -1,10 +1,21 @@
 //every nth document granularity for faster loading
-export const aggregationPipelineImproved = (everyNth?: number, lastNRecords?: number): any[] => {
+export const aggregationPipelineImproved = (everyNth?: number, lastNRecords?: number, beforeTime?: Date): any[] => {
   const pipeline = [];
-
+  
   pipeline.push(
     { $sort: { timestamp: 1 } },
   );
+  
+  if(beforeTime){
+    pipeline.push({
+      $match: {
+        $expr: {
+          // Extract the minute from the timestamp and check if it's divisible by `everyNth`
+          $lt:["$timestamp", beforeTime]
+        },
+      },
+    });
+  }
 
   //Filter documents where the timestamp is every nth minute, if `everyNth` is provided
   if (everyNth !== null && everyNth !== undefined) {

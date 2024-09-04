@@ -1,4 +1,4 @@
-import { Divider, H4, Spinner } from '@blueprintjs/core';
+import { Button, Divider, H4, Spinner } from '@blueprintjs/core';
 import React, { useEffect, useState } from 'react';
 import DynamicCharts from '../components/DynamicCharts'; // Make sure to import the DynamicCharts component
 import SocketConnector from '../SocketConnector';
@@ -7,13 +7,27 @@ const DEFAULT_MAX_RECENT = 50;
 
 const HomePage: React.FC = () => {
   const [initialDataRecent, setInitialDataRecent] = useState<any>(null);
+  const [initialDataSpecific, setInitialDataSpecific] = useState<any>(null);
   const [initialDataHistoric, setInitialDataHistoric] = useState<any>(null);
+  const [loadingSpecific, setLoadingSpecific] = useState<boolean>(false);
+  const [hasSpecific, setHasSpecific] = useState<boolean>(false);
+
   const [loadingRec, setLoadingRec] = useState<boolean>(true);
   const [loadingHist, setLoadingHist] = useState<boolean>(true);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [socket, setSocket] = useState<SocketConnector | null>(null);
 
+  const handleClickOnTime = (timestamp: string | number): void =>{
+    if(!socket){
+      return;
+    }
+    setLoadingSpecific(true);
+    socket.emit('fetchTime', timestamp);
+  }
+  
   useEffect(() => {
     const socketConnector = new SocketConnector();
+    setSocket(socketConnector);
   
     socketConnector.on("data", (dataUpdate: any) => {
       const lastUpdated = getLastUpdated(dataUpdate);
@@ -74,6 +88,12 @@ const HomePage: React.FC = () => {
       setInitialDataRecent(initialRec);
       setLoadingRec(false);
     });
+
+    socketConnector.on("dataSpecific", (spec: any) => {
+      setInitialDataSpecific(spec);
+      setLoadingSpecific(false);
+      setHasSpecific(true);
+    });
   
     return () => {
       socketConnector.close();
@@ -86,7 +106,21 @@ const HomePage: React.FC = () => {
 
       <br></br>
 
-      <H4>{lastUpdated ? `Recent Data (Last Updated: ${new Date(lastUpdated).toLocaleString('en-GB')})` : 'Recent Data'}</H4>
+      <p></p>
+        <H4>{hasSpecific && 'Specific Data'}</H4>
+        {hasSpecific && <Button intent="danger" onClick={()=>{setHasSpecific(false)}}>Clear</Button>}
+
+        {loadingSpecific && <Spinner intent="primary" size={50} />}
+
+        {hasSpecific && <DynamicCharts data={initialDataSpecific} />}
+      
+      </div>
+      <div>
+
+      <br></br>
+
+      <H4>{lastUpdated? `Recent Data (Last Updated: ${new Date(lastUpdated).toLocaleString('en-GB')})` : 'Recent Data'}</H4>
+
       <p></p>
         {loadingRec? (
           <Spinner intent="primary" size={50} />
@@ -105,7 +139,7 @@ const HomePage: React.FC = () => {
         {loadingHist? (
           <Spinner intent="primary" size={50} />
         ) : (
-          <DynamicCharts data={initialDataHistoric} /> // Render the charts once data is loaded
+          <DynamicCharts handleClickOnTime={handleClickOnTime} data={initialDataHistoric} /> // Render the charts once data is loaded
         )}
       </div>
     </div>

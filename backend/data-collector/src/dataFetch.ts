@@ -102,6 +102,25 @@ export class DataFetch {
     }
   }
 
+  public static async fetchAggregatedDataSpecific(timestamp: string): Promise<any> {
+    try {
+      let time = undefined;
+      if(timestamp){
+        time = new Date(timestamp);
+      }
+      const pipelineRecent = aggregationPipelineImproved(undefined, RECENT_NUM_RECORDS, time);
+
+      const resultRecent = await StoredStatusModel.aggregate(pipelineRecent);
+
+      // destructure first element to get clean result
+      const [formattedResult] = resultRecent.length > 0 ? resultRecent : [{}];
+
+      return formattedResult;          
+    } catch (error) {
+      console.error('Error fetching aggregated data from MongoDB:', error);
+    }
+  }
+
   start() {
     this.timer.start();
   }

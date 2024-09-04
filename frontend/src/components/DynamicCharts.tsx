@@ -5,15 +5,21 @@ import { CategoricalChartState } from 'recharts/types/chart/types';
 // dataset has the structure: { servers_count: [{ timestamp: string, region1: number, region2: number, ... }], ... }
 interface DynamicChartsProps {
   data: any;
+  handleClickOnTime?: (timestamp: string | number) => void;
 }
 
 const regions = ['us_east', 'eu_west', 'eu_central', 'us_west', 'sa_east', 'ap_southeast'];
 const regionColours = ['#E2C8E4', '#28E6CF', '#BFD88C', '#77B1A9', '#F3C981', '#B3D9FF'];
 
-const DynamicCharts: React.FC<DynamicChartsProps> = ({ data }) => {
+const DynamicCharts: React.FC<DynamicChartsProps> = ({ data, handleClickOnTime }) => {
   // Render charts for each metric
   const handleClick = (nextState: CategoricalChartState, event: any) => {
-    console.log(event);
+    if(!nextState.activePayload || !handleClickOnTime){
+      return;
+    }
+    const timeClicked = nextState.activePayload[0].payload.timestamp;
+    handleClickOnTime && handleClickOnTime(timeClicked);
+    console.log(`time clicked: ${timeClicked}`);
   };
   
   const renderChart = (metricData: any, title: string) => (

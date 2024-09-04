@@ -39,12 +39,18 @@ server.listen(Number(SERVER_PORT), '0.0.0.0', async () => {  // Listen on all ne
 
   await connectToDatabase();
   const TICK_INTERVAL = 60000;
-  const fetcher = new DataFetch(socketConnector, TICK_INTERVAL);
+const fetcher = new DataFetch(socketConnector, TICK_INTERVAL);
 
   socketConnector.on('connect', async () => {
     // Start fetching both recent and historic data concurrently
     const recentDataPromise = DataFetch.fetchAggregatedDataRecent();
     const historicDataPromise = DataFetch.fetchAggregatedDataHistoric();
+
+    socketConnector.addFetchTimeCallback(async(timestamp:any) => {
+      console.log("fetchTime called");
+      const recentData = await DataFetch.fetchAggregatedDataSpecific(timestamp);
+      socketConnector.emit('dataSpecific', recentData);
+    });
   
     // Handle recent data first when it's ready
     recentDataPromise
@@ -68,6 +74,7 @@ server.listen(Number(SERVER_PORT), '0.0.0.0', async () => {  // Listen on all ne
         socketConnector.emit('error', 'Failed to fetch historic data');
       });
   });
+
 
   process.on("uncaughtException", (innerErr: Error) => {
     console.error(`UNCAUGHT EXCEPTION AT SYSTEM LEVEL: ${innerErr.message}`);

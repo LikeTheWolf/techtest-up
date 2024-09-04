@@ -2,7 +2,8 @@ import * as socketio from 'socket.io';
 
 export default class SocketManager {
   private io: socketio.Server;
-
+  private callback: any;
+  
   constructor(server: any) {
     this.io = new socketio.Server(server, {
       cors: {
@@ -23,6 +24,12 @@ export default class SocketManager {
       socket.on('message', (data: any) => {
         console.log('Received message:', JSON.stringify(data));
       });
+      socket.on('fetchTime', (data:any) =>{
+        
+        if(this.callback){
+          this.callback(data);
+        }
+      });
     });
   }
 
@@ -39,5 +46,9 @@ export default class SocketManager {
   // Method to emit events to all connected clients
   public on(event: string, callback: (...args: any[]) => void): void {
     this.io.on(event, callback);
+  }
+
+  public addFetchTimeCallback(callback: any){
+    this.callback = callback;
   }
 }
