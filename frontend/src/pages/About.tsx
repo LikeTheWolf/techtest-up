@@ -22,6 +22,16 @@ const AboutPage: React.FC = () => {
       This guy.
       </p>
 
+      <p>Follow me on github!{' '}<a
+          href="https://github.com/LikeTheWolf"
+          target="_blank"
+          rel="noopener noreferrer"
+         
+        >
+          LikeTheWolf
+        </a>
+      </p>
+
       <Divider />
 
       <h2>A Nod to Future Enhancements</h2>
